@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "risf.fullname" . }}-service
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "risf.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+  selector:
+    {{- include "risf.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: itsf
+description: A Helm chart for deploying the ITSF application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Mehdi Halitim
+    email: mehdi.halitim@foxoconsulting.com

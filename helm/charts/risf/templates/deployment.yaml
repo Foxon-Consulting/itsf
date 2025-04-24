@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "risf.fullname" . }}
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "risf.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "risf.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "risf.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "risf.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 80
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        securityContext:
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+        volumeMounts:
+        - mountPath: /var/cache/nginx
+          name: nginx-cache
+        - mountPath: /var/run
+          name: nginx-run
+      volumes:
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-run
+        emptyDir: {}

@@ -1,0 +1,52 @@
+name: integration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches-ignore:
+      - "release-please--*"
+  release:
+    types:
+      - published
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: pre-commit
+        uses: Foxon-Consulting/github-actions/integration/common/pre-commit@main
+
+  kubernetes-validation:
+    name: Validation Kubernetes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Installer Kubeval
+        run: |
+          curl -L -o kubeval.tar.gz https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+          tar -xzf kubeval.tar.gz
+          sudo mv kubeval /usr/local/bin/
+          rm kubeval.tar.gz
+
+      - name: Valider avec Kubeval
+        run: |
+          for dir in "itsf/k8s/" "risf/k8s/"; do
+            echo "Validation du répertoire ${dir} avec Kubeval"
+            kubeval --ignore-missing-schemas ${dir}*.yaml
+          done
+
+  releasing:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-commit
+      - kubernetes-validation
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: releasing
+        uses: Foxon-Consulting/github-actions/delivery/common/release-please@main
+        with:
+          RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}

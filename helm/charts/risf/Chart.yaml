@@ -1,0 +1,9 @@
+apiVersion: v2
+name: risf
+description: A Helm chart for deploying the RISF application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Mehdi Halitim
+    email: mehdi.halitim@foxoconsulting.com

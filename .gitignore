@@ -1,0 +1,54 @@
+# Ignorer tous les certificats générés
+/certs/**
+/hello-itsf.local.domain/certs/**
+/hello-risf.local.domain/certs/**
+
+# # Ignorer les secrets TLS
+# /hello-itsf.local.domain/k8s/tls-secret.yaml
+# /hello-risf.local.domain/k8s/tls-secret.yaml
+
+# Ignorer les fichiers de numéro de série des certificats
+*.srl
+
+# Ignorer les fichiers temporaires et de build
+**/node_modules/
+**/.DS_Store
+**/tmp/
+**/.tmp/
+**/build/
+**/.idea/
+**/.vscode/
+**/dist/
+
+# Ignorer les fichiers logs
+*.log
+**/logs/
+
+# Ignorer les fichiers de configuration spécifiques à l'environnement local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignorer les images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+
+# Ignorer les fichiers générés par Kubernetes
+**/kubeconfig
+
+# Ignorer les binaires
+*.exe
+*.bin
+*.o
+*.so
+*.dll
+
+# Ignorer les fichiers de sauvegarde
+*~
+*.bak
+*.backup
+*.swp

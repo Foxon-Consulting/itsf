@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "itsf.fullname" . }}
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "itsf.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "itsf.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "itsf.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "itsf.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 80
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        securityContext:
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+        volumeMounts:
+        - mountPath: /var/cache/nginx
+          name: nginx-cache
+        - mountPath: /var/run
+          name: nginx-run
+        - mountPath: /usr/share/nginx/html
+          name: itsf-content
+          readOnly: true
+      volumes:
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-run
+        emptyDir: {}
+      {{- if .Values.persistence.enabled }}
+      - name: itsf-content
+        persistentVolumeClaim:
+          claimName: {{ include "itsf.fullname" . }}-pvc
+      {{- end }}

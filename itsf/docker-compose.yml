@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./itsf.html:/usr/share/nginx/html/index.html
+    environment:
+      - VIRTUAL_HOST=hello-itsf.local.domain

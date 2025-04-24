@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: itsf-deployment
+  namespace: itsf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: itsf-app
+  template:
+    metadata:
+      labels:
+        app: itsf-app
+    spec:
+      # Spécifier un compte de service spécifique
+      serviceAccountName: restricted-service-account
+      securityContext:
+        # Empêcher les conteneurs de root
+        runAsNonRoot: true
+        # ID d'utilisateur non-root
+        runAsUser: 1001
+        # ID de groupe non-root
+        runAsGroup: 1001
+        # Empêcher l'escalade des privilèges
+        fsGroup: 1001
+      containers:
+      - name: itsf-container
+        image: itsf:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"
+        securityContext:
+          # Empêcher l'escalade des privilèges
+          allowPrivilegeEscalation: false
+          # Ne pas autoriser les capacités privilégiées
+          capabilities:
+            drop:
+            - ALL
+          # Activer le mode lecture seule pour le système de fichiers racine
+          readOnlyRootFilesystem: true
+          # Verifier que le conteneur ne s'exécute pas en tant que root
+          runAsNonRoot: true
+          # Utiliser un utilisateur spécifique
+          runAsUser: 1001
+        # Points de montage pour les dossiers qui doivent être accessibles en écriture
+        volumeMounts:
+        - mountPath: /var/cache/nginx
+          name: nginx-cache
+        - mountPath: /var/run
+          name: nginx-run
+        - mountPath: /usr/share/nginx/html
+          name: itsf-content
+          readOnly: true
+      # Définition des volumes temporaires nécessaires pour nginx
+      volumes:
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-run
+        emptyDir: {}
+      # - name: itsf-content
+      #   configMap:
+      #     name: itsf-html-content
+      - name: itsf-content
+        persistentVolumeClaim:
+          claimName: itsf-pvc
